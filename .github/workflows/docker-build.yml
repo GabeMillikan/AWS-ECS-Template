@@ -9,22 +9,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-        contents: read
-        packages: write
+      contents: read
+
     steps:
     - name: Check out the repository
       uses: actions/checkout@v2
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v1
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+        aws-region: YOUR_AWS_REGION # e.g., us-east-1
 
-    - name: Set lower case repo name
-      id: container_name
-      run: echo "CONTAINER_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build and push Docker image for nginx
       uses: docker/build-push-action@v2
@@ -32,4 +32,4 @@ jobs:
         context: .
         file: ./.docker/nginx.Dockerfile
         push: true
-        tags: ghcr.io/${{ env.CONTAINER_NAME }}/nginx:latest
+        tags: ${{ steps.login-ecr.outputs.registry }}/nginx:latest
