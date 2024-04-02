@@ -66,3 +66,9 @@ this is nowhere near done yet - if you're reading this, check back in a year
         - vpc: from step 1
         - enable all subnets
         - security group: "permissive_internet"
+
+### Auto-deploy
+edit "github-actions" role
+- add inline custom policy
+- ARN: reference the production-service
+- permission: "ecr:UpdateService"
