@@ -26,14 +26,6 @@ jobs:
       id: container_name
       run: echo "CONTAINER_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-    - name: Build and push Docker image for fastapi
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./.docker/fastapi.Dockerfile
-        push: true
-        tags: ghcr.io/${{ env.CONTAINER_NAME }}/fastapi:latest
-
     - name: Build and push Docker image for nginx
       uses: docker/build-push-action@v2
       with:

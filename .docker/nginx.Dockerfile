@@ -1,4 +1,3 @@
-# here's where you would build your frontend
 FROM node:16 as node-base
 WORKDIR /web
 COPY frontend/src frontend/build
