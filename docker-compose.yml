@@ -1,16 +1,16 @@
 version: '3.8'
 services:
-  web:
+  fastapi:
     build:
       context: .
-      dockerfile: Dockerfile.fastapi
+      dockerfile: .docker/fastapi.Dockerfile
     ports:
       - "8000:80"
   nginx:
     build:
       context: .
-      dockerfile: Dockerfile.nginx
+      dockerfile: .docker/nginx.Dockerfile
     ports:
       - "80:80"
     depends_on:
-      - web
+      - fastapi
