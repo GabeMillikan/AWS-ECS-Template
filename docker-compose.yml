@@ -1,8 +1,8 @@
 version: '3.8'
 services:
-  nginx:
+  fastapi:
     build:
       context: .
-      dockerfile: .docker/nginx.Dockerfile
+      dockerfile: .docker/fastapi.Dockerfile
     ports:
-      - "80:80"
+      - "80:8081"

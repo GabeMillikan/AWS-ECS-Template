@@ -66,9 +66,32 @@ this is nowhere near done yet - if you're reading this, check back in a year
         - vpc: from step 1
         - enable all subnets
         - security group: "permissive_internet"
+7. Fix auto-deployment
+    - edit "github-actions" role
+        - add inline custom policy
+        - ARN: reference the production-service
+        - permission: "ecr:UpdateService"
+8. EC2 -> Create Load balancer
+    - network load balancer
+    - 
 
-### Auto-deploy
-edit "github-actions" role
-- add inline custom policy
-- ARN: reference the production-service
-- permission: "ecr:UpdateService"
+
+
+
+# ATTEMPT 2
+just going to write down everything I do
+1. Create IAM user for github-actions
+    - don't give console access
+    - add permissions manually
+    - add AmazonEC2ContainerRegistryFullAccess
+2. Give GitHub access to this user
+    - create access key for the user
+    - select 'third party service' and ignore warning - create anyway (just cuz I don't wanna deal with more complicated options yet)
+    - description: Used by GitHub Actions to push images during CI.
+    - repository -> settings -> Secrets and variables -> Actions -> create secrets
+        - AWS_ECR_SECRET_ACCESS_KEY: copy/paste the "secret access key" from aws
+        - AWS_ECR_ACCESS_KEY_ID: copy/paste the "access key" from aws
+3. Create a (private) ECR repository on AWS for each of the images that you want to launch in ECS
+4. Create or update a GitHub Actions workflow to build your images and push them to ECR.
+    - see example: [build.yml](.github/workflows/build.yml)
+5. Push some code and verify that the build and push succeeds. Check that a new `latest` image is available in the AWS console.
