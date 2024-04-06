@@ -338,7 +338,11 @@ todo: explain how the aws layout works
     - you should see only one tasks (since there is no load)
     - visit the `/stress` endpoint in your browser to increase CPU usage (i.e. `https://{load-balancer.dns}/stress`)
     - Ensure that ECS spawns additional tasks. Wait for the stress to die down, and verify that ECS deactivates some tasks. (this will take several minutes)
-    - TODO: screenshot
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/high-cpu-util.png" width="600px"/><br>
+        <img src="./.readme-images/autoscale-adds-new-task.png" width="600px"/>
+    </details> 
 
 ## Enable Auto-Deployment
 
