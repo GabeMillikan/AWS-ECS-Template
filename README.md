@@ -30,7 +30,7 @@ Every resource we create in this guide will have a link to detailed pricing info
 See [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 Estimated time:
-- to blindly follow instructions without learning anything: **30 minutes**
+- to blindly follow instructions without learning anything: **1 hour**
 - surface level understanding of how services interconnect: **3 hours**
 - in-depth understanding: **8 hours** (or more - the AWS hole goes **DEEP**)
 - how long it took me, without an up-to-date guide: 16-20 hours (plus some time to document the process here)
