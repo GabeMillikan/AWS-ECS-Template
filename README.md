@@ -1,5 +1,7 @@
 this is nowhere near done yet - if you're reading this, check back in a year
 
+> [!NOTE]
+> If you have any experience with this, please open a PR and add your comments!
 
 # What is this?
 This repository is a fairly basic template & tutorial for deploying a production web server on [Amazon's ECS](https://aws.amazon.com/ecs/), with the following features:
@@ -12,11 +14,17 @@ This repository is a fairly basic template & tutorial for deploying a production
 
 I provide no guarantee regarding the quality of this guide, I am simply documenting my own learnings while approaching this kind of infrastructure for the first time.
 
-> [!NOTE]  
-> If you have any improvements, please open a PR!
+
+### Pricing
+The _minimum_ price for this server setup is in the ballpark of $35/mo (although, by disabling some options, $7/mo is possible). For small websites (<100,000 requests a day, it will likely not exceed $60/mo). You can more accurately gauge the price using the [AWS Pricing Calculator](https://calculator.aws/) (it's not "easy" to use, which is why I include the aforementioned estimate).
+
+Every resource we create in this guide will have a link to detailed pricing information, but here's a quick, rough breakdown:
+- **ECS**: $7/mo for the smallest task
+- **EC2**: $16/mo for a load balancer (lower quality workaround: free)
+- **RDS**: $10/mo for the smallest Postgres database (lower quality workaround: free)
 
 > [!IMPORTANT]  
-> The minimum price for this server setup is about $30/mo, assuming the server is online 24/7. If you accidentally scale up your server, it may cost you thousands. Be careful, check your bill frequently!
+> AWS will happily bill you for thousands of dollars if you accidentally scale up your server (or get attacked without autoscaling limits). Be careful, check your bill frequently and make sure you have reasonable scaling limits (covered in this guide)!
 
 ### AWS Setup Instructions
 See [AWS.md](./instructions/AWS.md)
