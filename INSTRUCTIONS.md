@@ -1,4 +1,4 @@
-todo: screenshots + RDS + SSH + autoscaling
+todo: screenshots + RDS + SSH + autoscaling + repo
 
 
 1. Create IAM user for github-actions
