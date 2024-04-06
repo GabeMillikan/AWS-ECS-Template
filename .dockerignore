@@ -1,3 +1,19 @@
+# from gitignore
 .vscode/
 .venv/
 __pycache__/
+requirements.txt
+
+# irrelevant at runtime
+.docker/
+.github/
+.gitignore
+.gitattributes
+.dockerignore
+docker-compose.yml
+
+# irrelevant to non-humans
+.readme-images/
+README.md
+INSTRUCTIONS.md
+LICENSE
