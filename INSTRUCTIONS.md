@@ -1,114 +1,17 @@
-todo: screenshots + RDS + SSH + autoscaling + repo
-
-
-1. Create IAM user for github-actions
-    - name: "github-actions"
-    - don't give console access
-    - add permissions manually
-    - add AmazonEC2ContainerRegistryFullAccess
-2. Give GitHub access to this user
-    - create access key for the user
-    - select 'third party service' and ignore warning - create anyway (just cuz I don't wanna deal with more complicated options yet)
-    - description: Used by GitHub Actions to push images during CI.
-    - repository -> settings -> Secrets and variables -> Actions -> create secrets
-        - AWS_ECR_SECRET_ACCESS_KEY: copy/paste the "secret access key" from aws
-        - AWS_ECR_ACCESS_KEY_ID: copy/paste the "access key" from aws
-3. Create a (private) ECR repository on AWS for each of the images that you want to launch in ECS
-    - name: "fastapi"
-4. Create or update a GitHub Actions workflow to build your images and push them to ECR.
-    - see example: [build.yml](.github/workflows/build.yml)
-5. Push some code and verify that the build and push succeeds. Check that a new `latest` image is available in the AWS console.
-6. Create a Fargate cluster in ECS
-    - name: "production-cluster"
-7. Create IAM role `ecsTaskExecutionRole`
-    - [guide in docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html>
-    - IAM -> Create Role
-        - entity type: AWS service
-        - service or use case: Elastic Container Service
-        - use case: Elastic Container Service Task
-        - add permission "AmazonECSTaskExecutionRolePolicy"
-        - role name: "ecsTaskExecutionRole"
-8. Create task definition
-    - name: "production-task-definition"
-    - launch type: fargate
-    - os: linux/x64
-    - task size: .25 vcpu, .5 gb memory
-    - task role: none
-    - task execution role: ecsTaskExecutionRole
-    - container 1
-        - name: "fastapi"
-        - image uri: copy from ECR (make sure to copy the tag as well, like ...fastapi:latest, not just the repository)
-        - port mappings: 8081 TCP (no name/protocol override)
-        - default log collection enabled
-9. Create VPC
-    - VPCs -> Create VPC and more
-    - auto-generated name scheme: "production" (so final vpc is named "production-vpc" and gateway is "production-igw" etc.)
-    - ipv4 cidr: 10.0.0.0/16
-    - no ipv6
-    - 3 AZs
-    - 3 public subnets
-    - 0 private subnets
-    - no NAT
-    - no S3 endpoints
-    - enable DNS hostnames + resolution
-10. Create security group for load balancer
-    - Security Group -> Create
-    - name: "production-load-balancer-security-group"
-    - description: allows inbound TCP traffic on ports 80 and 443
-    - vpc: production-vpc
-    - add inbound rules to allow TCP on port 80 + 443 for ipv4 + ipv6
-    - remove any outbound rules (LB shouldn't be making requests TODO: healthcheck requests?)
-11. Create security group for ecs service
-    - Security Group -> Create
-    - name: "production-ecs-service-security-group"
-    - description: allows inbound traffic from load balancer
-    - vpc: production-vpc
-    - allow all tcp traffic from security group production-load-balancer-security-group
-12. Create target group
-    - name: "production-target-group"
-    - target type: IP
-    - protocol/port: HTTP/8081
-    - vpc: production-vpc
-    - protocol version: http/1.1 (note that http/2 requests can be translated within the load balancer)
-    - leave health check at the root
-    - remove any IP addresses
-    - ensure port is still 8081
-    - don't add any targets (we haven't created the cluster service yet)
-13. Create load balancer
-    - application load balancer
-    - name: "production-load-balancer"
-    - internet facing
-    - ipv4
-    - production-vpc
-    - enable mappings for all AZs (public subnets)
-    - listener for port 80 points to production-target-group (TODO: add listener for :443)
-    - hit "create" and wait for "State" to be 'active'
-14. Create ECS service
-    - ECS -> clusters -> production-cluster -> services -> create
-    - fargate capacity provider
-    - application type: service
-    - task family: production-task-definition (LATEST)
-    - name: "production-service"
-    - desired tasks: 2 (for now, just to test balancing - later setup autoscaling)
-    - networking
-        - vpc: production-vpc
-        - subnets: public subnets
-        - security group: production-ecs-service-security-group
-        - auto-assign public IP: enabled (ALMOST CERTAINLY NOT REQUIRED: TODO)
-    - load balancing
-        - application load balancer
-        - container: select fastapi 8081:8081 (TODO: TLS?)
-        - use existing load balancer: production-load-balancer
-        - use existing listener: 80:HTTP
-        - use existing target group: production-target-group
-
 ## Table of Contents
 
 - [Target Audience](#target-audience) (recommended level of experience)
 - [Initialize GitHub Project](#initialize-git-hub-project) (setting up and building containers)
-- [How This Repository Works](#how-this-repository-works) (overview of the layout of code)
+- TODO: move or copy these to ./README.md
+    - [How This Repository Works](#how-this-repository-works) (overview of the layout of code)
+    - [How AWS Works](#how-this-repository-works) (overview of the AWS structure)
 - [Initialize AWS Project](#initialize-aws-project-create-a-vpc) (basic AWS configuration: create VPC + ECR repos)
 - [Upload Images to ECR](#upload-images-to-ecr-via-git-hub-actions) (setup GitHub -> AWS pipeline)
+- [Setup Security Groups](#setup-security-groups) (configure firewalls)
+- [Create an ECS Cluster](#create-an-ecs-cluster) (the home for servers)
+- [Setup Load Balancing](#setup-load-balancing) (request distribution among the cluster)
+- [Create an ECS Service](#create-an-ecs-service) (actually spawn server instances)
+- [Enable Auto-Deployment](#enable-auto-deployment) (restart ECS service after code push)
 
 ## Target Audience
 These instructions are detailed enough for beginners to understand them, but this is a complex project. It is unlikely that a beginner (to git, cloud hosting, or Docker) will learn anything substantial. I personally recommend accomplishing the following _before_ trying to follow this guide:
@@ -128,6 +31,10 @@ If you're ambitious, I won't stop you, but be extremely careful about billing!
 
 todo: explain how the repo layout works
 
+## How AWS Works
+
+todo: explain how the aws layout works
+
 ## Initialize AWS Project *(Create a VPC)*
 
 1. Create an AWS account.
@@ -137,6 +44,7 @@ todo: explain how the repo layout works
     - [direct link](https://aws.amazon.com/console/) (you may have to click "log back in")
 3. Choose a region
     - In the top right, click the dropdown next to your name. This is where your server will be physically located. I will choose us-east-2 simply because it is the cheapest location in the U.S. (by a small margin), but any other choice will suffice. This guide will only cover single-region setups (for now; I haven't explored multi-region deployments yet). 
+    - Note that throughout this guide, you will keep this constant. If something ever seems to "disappear" after you created it, it's probably because you accidentally switched to a new region. (except for some resources that aren't region-specific, where the dropdown will display "Global")
     <details>
         <summary>See Image</summary>
         <img src="./.readme-images/select-region.png" width="350px"/>
@@ -177,7 +85,7 @@ todo: explain how the repo layout works
     - I will create private repositories named `template-guide-nginx` and `template-guide-fastapi`, but you may choose to publish them (if you know what you're doing).
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/create-ecr-repo.png" height="600px"/>
+        <img src="./.readme-images/create-ecr-repo.png" height="600px"/><br>
         <img src="./.readme-images/created-ecr-repos.png"/>
     </details>
 
@@ -223,25 +131,223 @@ todo: explain how the repo layout works
         - secret: copy the "secret access key" from your AWS tab from step 2
         - should look similar to "Gdyz07K+o1DH7duB0W4gwFrxNnzRtLXAUVCYZK+h" 
     - (note that the above examples are randomly generated and not real keys, obviously)
+    - (note: you can close that tab now)
     <details>
         <summary>See Image</summary>
         <img src="./.readme-images/gh-add-repo-secret.png" width="450px"/>
     </details>
-5. Update and trigger CI
+5. Update and trigger CI (TODO: update this step once the repository is finished, since the line numbers will move + images will look different; the build will fail)
     - Update the repository names in [build.yml](.github/workflows/build.yml)
     - for example, update line 35 by replacing `template-guide-fastapi` to whatever you named your ECR repository
     - do the same for NGINX
     - commit the changes to the `main` branch
-    - on github.com, watch 
+    - on github.com, verify that the build + upload tasks succeed:
+        - step "Build FastAPI and push to ECR"
+        - step "Build NGINX and push to ECR"
+    - Note that the deployment step "Force new ECS Service deployment" _should_ fail, since we haven't setup the ECS cluster yet. We will come back to this later!
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/gh-ci-build-verify-1.png" width="400px"/><br>
+        <img src="./.readme-images/gh-ci-build-verify-2.png" width="400px"/><br>
+        <img src="./.readme-images/gh-ci-build-verify-3.png" width="400px"/>
+    </details> 
+6. Verify images are visible in ECR
+    - Go back to ECR -> Private Registry -> Repositories
+    - Click into each of your repositories and verify that a new `latest` image was uploaded
+    - If you want to, make a few more commits to the `main` branch, and verify that new images are uploaded
+    - TODO: auto-delete old images so that S3 space isn't wasted?
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/ecr-latest-image-uploaded.png" width="600px"/>
+    </details> 
 
+## Setup Security Groups
 
-TODO: copy/paste me for security groups
-Create a Security Group for GitHub Actions
-    - Which will give GitHub access to your private ECR repositories
-    - Note: it doesn't matter if you get to "Security Groups" as an EC2 feature or as a VPC feature, they are the same (the search bar returns both, for some reason).
-    - I will **name** mine `template-guide-github-actions-sg`
-    - Give it a **description** along the lines of "Authorizes GitHub Actions for GabeMillikan/AWS-ECS-Template to upload ECR images and force new ECS deployments"
-        - Being specific is useful, because we will create multiple security groups.
-        - We won't actually allow GitHub to "force new ECS deployments" *yet* (that will come later), but you cannot change the description so we need to include this now (you're welcome, for telling you now).
-    - Select the **VPC** you created earlier (mine is named `template-guide-vpc`)
-    - 
+1. Create security group for the Load Balancer
+    - The Load Balancer will accept inbound traffic from the internet, and pass proxy it into ECS
+    - Security Groups (VPC Feature) -> Create security group
+    - I will name mine `template-guide-load-balancer-sg`
+    - Description along the lines of "Allows inbound internet TCP traffic on port 80." TODO: 22, 443, icmp?
+    - Select the VPC you created earlier, mine is named `template-guide-vpc`
+    - Add a inbound rules to allow TCP traffic on port 80 from any ipv4 or ipv6 address (unless you have a good reason to discriminate).
+    - TODO: restrict outbound to ecs only?
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/sg-load-balancer.png" width="600px"/>
+    </details> 
+2. Create security group for your servers (aka ECS Tasks)
+    - Your tasks will accept inbound traffic from the load balancer
+    - Security Groups (VPC Feature) -> Create security group
+    - I will name mine `template-guide-ecs-tasks-sg`
+    - Description along the lines of "Allows inbound traffic from the load balancer."
+    - Select the VPC you created earlier, mine is named `template-guide-vpc`
+    - Add an inbound rule allowing all traffic from the security group created in the above step.
+        - Type: All Traffic
+        - Source: Custom, and search for the name of the load balancer security group
+    - TODO: can probably disable all outbound traffic?
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/sg-ecs-tasks.png" width="600px"/>
+    </details>
+
+## Create an ECS Cluster
+
+1. Create `ecsTaskExecutionRole` IAM Role
+    - I don't fully understand the purpose of this role, but you must have it.
+    - (it's possible that your account already has this role by default, in which case, skip this step)
+    - There is an official guide for this [in the docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html). Otherwise, here's a summary:
+        - IAM -> Roles -> Create Role
+        - entity type: AWS service
+        - service or use case: Elastic Container Service
+        - use case: Elastic Container Service Task
+        - add permission "AmazonECSTaskExecutionRolePolicy"
+        - role name: `ecsTaskExecutionRole`
+        - leave the default description: "Allows ECS tasks to call AWS services on your behalf." (you could probably change it, but why bother?)
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/iam-role-ecr-1.png" width="400px"/><br>
+        <img src="./.readme-images/iam-role-ecr-2.png" width="400px"/><br>
+        <img src="./.readme-images/iam-role-ecr-3.png" width="400px"/>
+    </details> 
+2. Create a Task Definition
+    - A "task" is a server (for this application). Multiple tasks can exist simultaneously (i.e. horizontal scaling).
+    - A Task Definition is a "blueprint" or "template" used to spawn new tasks (exactly like a classes and instances in OOP).
+    - Elastic Container Service -> Task Definitions -> Create new task definition (without JSON)
+    - I will use the name: `template-guide-task-def`
+    - Launch Type: Fargate (dramatically simplifies cluster configuration with no added cost)
+    - Task Size: Start small, you can increase this later.
+    - Task role: None (TODO: pretty sure this needs to be something to access RDS)
+    - Task Execution Role: `ecsTaskExecutionRole` (from step 1)
+    - TODO: update container 1/2 after finishing the repository
+    - Container 1:
+        - Name: `fastapi`
+        - Image URI: go to ECR and copy the URI of the `latest` image (make sure it includes `:latest` tag at the end)
+        - Note that you _do not_ need to enable "Private registry authentication" (despite the fact that your repository is private)
+        - port mappings: 8081 / TCP / HTTP (todo)
+        - enable the default log collection, it's basically free (todo)
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/create-task-definition.png" width="500px"/>
+    </details> 
+3. Create Cluster
+    - ECS -> Clusters -> Create cluster
+    - I will name mine `template-guide-cluster`
+    - use Fargate infrastructure
+    - wait for it to complete (takes a minute, reload the page)
+
+## Setup Load Balancing
+
+1. Create a Target Group
+    - This defines where the load balancer will forward requests to
+    - EC2 -> Target Groups -> Create Target Group
+    - > [IMPORTANT!]
+      > Select "IP Addresses"
+    - I will name this group `template-guide-tasks-tg`
+    - Protocol : port = HTTP : 80
+    - (TODO: also create a TG for 443? or handle cert at AWS level?)
+    - IP Address Type: IPv4
+    - VPC: the one you created, mine is `template-guide-vpc`
+    - Protocol version: HTTP1 (since the load balancer is capable of downgrading HTTP/2 requests to HTTP/1.1)
+    - Health Checks: leave at default `/` (TODO: build an actual healthcheck endpoint?)
+    - On the next page, delete any IPs that were automatically added. The load balancer will be able to automatically find the tasks that are in this VPC.
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/target-group-1.png" width="400px"/><br>
+        <img src="./.readme-images/target-group-2.png" width="400px"/>
+    </details> 
+2. Create a Load Balancer
+    - EC2 -> Load Balancers -> Create Load Balancer -> Application Load Balancer
+    - my name: `template-guide-load-balancer`
+    - VPC: select your VPC
+    - Enable all suggested mappings (this balancer should support ALL tasks, regardless of subnet)
+    - Security group: select the one you created for the load balancer, mine is called `template-guide-load-balancer-sg`. Deselect any pre-selected defaults
+    - Update or create an HTTP listener on port 80 and select your target group
+    - Hit create, and wait until its "Status" is "Active". This will take a few minutes, take a much-needed break!
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/load-balancer.png" width="400px"/><br>
+        <img src="./.readme-images/load-balancer-active.png" width="550px"/>
+    </details> 
+
+## Create an ECS Service
+
+1. Create a Service
+    - The service is responsible for facilitating the creation of tasks within the cluster
+    - click on your cluster -> Services -> Create (at the bottom of the page)
+    - Environment
+        - Compute Configuration: Fargate
+        - Launch type: Fargate
+        - Platform version: Fargate
+    - Deployment Configuration
+        - Application type: Service 
+        - Family: Select the task definition created in step 2
+        - Revision: (LATEST)
+        - I will name mine `template-guide-service`
+        - Desired tasks: 2 (for now, to demonstrate load balancing; we will setup auto-scaling later)
+    - Networking
+        - VPC: choose your VPC, mine is `template-guide-vpc`
+        - Subnets: choose all of the public ones (all of them, if you didn't create private subnets)
+        - Use an existing security group: the one you created for ECS tasks. Mine is called `template-guide-ecs-tasks-sg`. Deselect any default groups.
+        - Enable Public IP (note that the security group disallows all incoming internet traffic - this is used exclusively for outbound requests to ECR for fetching container images)
+    - Load Balancing
+        - Load balancer type: Application Load Balancer
+        - container: fastapi 8081:8081 (todo: should this be nginx :80 or :443?)
+        - use an existing load balancer: the one you created, mine is `template-guide-load-balancer`
+        - use an existing listener: the one you created, HTTP:80 (TODO: 443?)
+        - use an existing target group: the one you created, mine is `template-guide-tasks-tg`
+    - click "Create"
+    - wait for it to show up in the service list
+2. Verify tasks spawn successfully
+    - click on your service
+    - click on the "Tasks" tab near the top
+    - You should see two tasks (since we set the desired task count to 2)
+    - At the top of the filters, set "Filter desired status" to "Any desired status" (so we can see if any tasks fail unexpectedly)
+    - Wait for both tasks to be "Running" (this is the most likely failure point, there are a million things that can go wrong here and logs are useless! If you followed the guide exactly, you should get green status. Double check everything!)
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/running-tasks.png" width="600px"/>
+    </details> 
+3. Verify Load Balancer is working
+    - Go to EC2 -> Load Balancers
+    - Click on your load balancer
+    - Go to the "Resource map" tab
+    - you should see two healthy targets on the right (these are your two servers!)
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/lb-healthy-targets.png" width="600px"/>
+    </details> 
+4. Test web server
+    - Copy the DNS name from the load balancer (on the same page from step 3)
+    - Visit it in your browser!
+    - You should see a "hello world" json message
+5. Pat yourself on the back
+    - After all this work, there is _finally_ a tangible result!
+    - We're not done yet though...
+6. Setup auto-scaling
+    - ECS -> Clusters -> your cluster -> your service -> Update service
+    - set "desired number of tasks" to 1 (this will be updated by the auto-scaling policy at runtime)
+    - at the bottom, enable "service auto scaling"
+    - add a scaling policy, I will name mine `template-guide-scaling-policy`
+    - use target tracking (it's easier)
+    - set minimum tasks to 1, maximum tasks to whatever you're willing to pay for (start with a small number to ensure things are working as expected)
+    - ECS service metric: I will use average CPU utilization
+    - Target value: I will use 50 (i.e. spawn more tasks until CPU utilization is <50%)
+    - Leave the default scaling periods at 5 minutes (they just help prevent overcorrection) 
+7. Verify that the new scale is in place
+    - ECS -> Clusters -> your cluster -> your service -> tasks
+    - you should see only one tasks (since there is no load)
+    - visit the `/stress` endpoint in your browser to increase CPU usage (i.e. `https://{load-balancer.dns}/stress`) (TODO: create this endpoint)
+    - Ensure that ECS spawns additional tasks. Wait for the stress to die down, and verify that ECS deactivates some tasks. (this will take several minutes)
+
+## Enable Auto-Deployment
+
+todo
+
+## Setup Database
+
+todo
+
+## Setup Production SSH Connection
+
+todo
+

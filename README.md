@@ -18,7 +18,7 @@ I provide no guarantee regarding the quality of this guide, I am simply document
 ## Pricing
 The _minimum_ price for this server setup is in the ballpark of $35/mo (although, by disabling some options, $7/mo is possible). For small websites (<100,000 requests a day), it will likely not exceed $60/mo. You can more accurately gauge the price using the [AWS Pricing Calculator](https://calculator.aws/) (it's not "easy" to use, which is why I include the aforementioned estimate).
 
-Every resource we create in this guide will have a link to detailed pricing information, but here's a quick, rough breakdown:
+Every resource we create in this guide will have a link to detailed pricing information (TODO: actually do this), but here's a quick, rough breakdown:
 - **ECS**: $7/mo for the smallest task
 - **EC2**: $16/mo for a load balancer (lower quality workaround: free)
 - **RDS**: $10/mo for the smallest Postgres database (lower quality workaround: free)
