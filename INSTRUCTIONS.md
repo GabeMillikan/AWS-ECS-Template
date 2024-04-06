@@ -5,7 +5,7 @@
 - TODO: move or copy these to ./README.md
     - [How This Repository Works](#how-this-repository-works) (overview of the layout of code)
     - [How AWS Works](#how-this-repository-works) (overview of the AWS structure)
-- [Initialize AWS Project](#initialize-aws-project-create-a-vpc) (basic AWS configuration: create VPC + ECR repos)
+- [Initialize AWS Project](#initialize-aws-project) (basic AWS configuration: create VPC + ECR repos)
 - [Upload Images to ECR](#upload-images-to-ecr-via-git-hub-actions) (setup GitHub -> AWS pipeline)
 - [Setup Security Groups](#setup-security-groups) (configure firewalls)
 - [Create an ECS Cluster](#create-an-ecs-cluster) (the home for servers)
@@ -35,7 +35,7 @@ todo: explain how the repo layout works
 
 todo: explain how the aws layout works
 
-## Initialize AWS Project *(Create a VPC)*
+## Initialize AWS Project
 
 1. Create an AWS account.
     - [direct link](https://portal.aws.amazon.com/billing/signup#/start/email)
