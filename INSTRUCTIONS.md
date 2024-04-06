@@ -205,14 +205,34 @@ todo: explain how the repo layout works
         <summary>See Image</summary>
         <img src="./.readme-images/iam-create-access-key.png" width="600px"/>
     </details>
-3. Open Repository settings
+3. Open repository settings
     - Visit your repository on github.com
     - go to the "Settings" tab at the top (i.e. to the right of the Code/Issues/Pull Requests tabs)
     <details>
         <summary>See Image</summary>
         <img src="./.readme-images/github-repository-settings-tab.png" width="450px"/>
     </details>
-4. (currently testing if I need to enable actions permissions or not)
+4. Add repository secrets
+    - Navigate to Secrets -> Secrets and Variables -> Actions -> New repository secret
+    - first, the public access key
+        - name: `AWS_ACCESS_KEY_ID`
+        - secret: copy the "access key" from your AWS tab from step 2
+        - should look similar to "AKRJEAYGZSIBQ5MTQGT2"
+    - then, the private secret access key
+        - name: `AWS_SECRET_ACCESS_KEY`
+        - secret: copy the "secret access key" from your AWS tab from step 2
+        - should look similar to "Gdyz07K+o1DH7duB0W4gwFrxNnzRtLXAUVCYZK+h" 
+    - (note that the above examples are randomly generated and not real keys, obviously)
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/gh-add-repo-secret.png" width="450px"/>
+    </details>
+5. Update and trigger CI
+    - Update the repository names in [build.yml](.github/workflows/build.yml)
+    - for example, update line 35 by replacing `template-guide-fastapi` to whatever you named your ECR repository
+    - do the same for NGINX
+    - commit the changes to the `main` branch
+    - on github.com, watch 
 
 
 TODO: copy/paste me for security groups
