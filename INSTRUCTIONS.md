@@ -1,4 +1,5 @@
 todo: explain variables + uncomment workflow steps
+todo: just use names & let people change them instead of "mine is called: ..."
 
 ## Table of Contents
 
@@ -371,7 +372,54 @@ todo: explain how the aws layout works
 
 ## Setup Database
 
-todo
+1. Create Security Group
+    - VPC -> Security Groups
+    - Mine is called `template-guide-database-sg`
+    - description: Allows all inbound access to PostgreSQL.
+    - Add rules:
+        - PostgreSQL, All IPv4
+        - PostgreSQL, All IPv6
+2. Create RDS database
+    - RDS -> Databases -> Create database
+    - Standard create
+    - PostgreSQL
+    - Free Tier template (it can be upgraded later)
+    - I will name mine: `template-guide-database`
+    - Self managed password, auto generate
+    - Don't setup a connection
+    - Select your VPC, mine is `template-guide-vpc`
+    - enable public access (todo: can we disable this?)
+    - choose your security group from step (1), remove existing group
+    - hit create, and make note of the password
+    - wait for its status to turn green
+    <details>
+        <summary>See Image</summary>
+        <img src="./.readme-images/rds-create-db.png" width="400px"/>
+    </details>
+3. Connect to the database via psql
+    - install `psql` for example from [EDB](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+    - Connect via `psql --host {the assigned domain name of your DB} -U postgres` and enter your password when prompted
+    - Run `\l` and just verify that you can actually see some databases
+4. Create a database
+    - I will name mine "prod"
+    - `CREATE DATABASE prod;`
+    - connect to it: `\c prod`
+5. Create a user for the API backend
+    - I will name mine `api`
+    - I will use the password `p4ssw0rd`; you should pick something secure
+    - `CREATE USER api WITH PASSWORD 'p4ssw0rd';`
+6. Grant the api user full access to data within the database
+    - note: _without_ permission for schema changes i.e. dropping columns
+    - `GRANT CONNECT ON DATABASE prod TO api;`
+    - `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO api;`
+    - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api;`
+7. Create a user for migrations
+    - I will name mine `migrator`
+    - I will use the password `P4SSW0RD`; you should pick something secure
+    - `CREATE USER migrator WITH PASSWORD 'P4SSW0RD';`
+8. Grant migration permissions
+    - note: _without_ permission for access to data within tables
+    - `GRANT ALL PRIVILEGES ON SCHEMA public TO migrator;`
 
 ## Setup Production SSH Connection
 
