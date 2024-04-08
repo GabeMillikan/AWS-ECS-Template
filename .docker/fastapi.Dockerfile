@@ -13,4 +13,4 @@ COPY . .
 RUN rm -rf frontend
 
 # startup the container
-ENTRYPOINT [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8081" ]
+ENTRYPOINT [ "gunicorn", "-c", ".config/gunicorn.py", "-b", "0.0.0.0:8000", "main:app"]

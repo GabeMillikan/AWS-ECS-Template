@@ -1,3 +1,5 @@
+todo: explain variables + uncomment workflow steps
+
 ## Table of Contents
 
 - [Target Audience](#target-audience) (recommended level of experience)
