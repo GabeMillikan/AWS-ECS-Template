@@ -1,5 +1,13 @@
 version: '3.8'
 services:
+  postgresql:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: insecure-local-only
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   fastapi:
     build:
       context: .
@@ -12,3 +20,5 @@ services:
         FASTAPI_SERVER: fastapi:8000
     ports:
       - "80:80"
+volumes:
+  postgres_data:
