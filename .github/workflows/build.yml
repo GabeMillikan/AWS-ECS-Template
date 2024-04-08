@@ -33,3 +33,7 @@ jobs:
         file: ./.docker/fastapi.Dockerfile
         push: true
         tags: ${{ steps.login-ecr.outputs.registry }}/template-guide-fastapi:latest
+
+    - name: Deploy to Amazon ECS
+      run: |
+        aws ecs update-service --cluster ${{ secrets.AWS_ECS_CLUSTER_NAME }} --service ${{ secrets.AWS_ECS_SERVICE_NAME }} --force-new-deployment

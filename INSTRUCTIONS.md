@@ -95,7 +95,9 @@ todo: explain how the aws layout works
     - Go to IAM -> Users -> Create User
     - I will name mine `template-guide-github-actions`
     - Do not provide console access (GitHub doesn't need it)
-    - Attach policies directly, and select `AmazonEC2ContainerRegistryFullAccess` (to enable read and write access to your ECR repositories)
+    - Attach policies directly
+        - select `AmazonEC2ContainerRegistryFullAccess` (to enable read and write access to your ECR repositories)
+        - select 
     <details>
         <summary>See Image</summary>
         <img src="./.readme-images/iam-gh-actions-review.png" width="600px"/>
@@ -346,7 +348,25 @@ todo: explain how the aws layout works
 
 ## Enable Auto-Deployment
 
-todo
+1. Authorize IAM User 
+    - IAM -> Users -> your user
+    - Mine is called `template-guide-github-actions`
+    - click "Add Permissions" -> "Create inline Policy"
+    - service: Elastic Container Service
+    - Add actions:
+        - UpdateService
+        - DescribeServices
+    - click "Add ARNs" and enter the information for your ECS service
+        - my region: us-east-2
+        - my cluster: template-guide-cluster
+        - my service: template-guide-service
+    - Give your policy a name, like "ECSAllowNewDeployments"
+    <details>
+        <summary>See Images</summary>
+        <img src="./.readme-images/iam-gh-deployments-1.png" width="600px"/><br>
+        <img src="./.readme-images/iam-gh-deployments-2.png" width="600px"/>
+    </details> 
+2. TODO: verify successful deployment
 
 ## Setup Database
 
