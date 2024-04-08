@@ -6,5 +6,15 @@ COPY frontend/src frontend/build
 
 
 FROM nginx:1.25-bookworm
-COPY ./.config/nginx.conf /etc/nginx/nginx.conf
+
+# install envsubst
+RUN apt update && \
+    apt install -y gettext-base
+
+# copy static files
+COPY ./.config/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY --from=node-base /web/frontend/build /usr/share/nginx/html
+
+# setup config
+ARG FASTAPI_SERVER=localhost:8000
+RUN envsubst '$FASTAPI_SERVER' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf;

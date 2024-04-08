@@ -1,5 +1,4 @@
 todo: explain variables + uncomment workflow steps
-todo: fix local env (localhost/fastapi name issue)
 
 ## Table of Contents
 
@@ -23,7 +22,6 @@ These instructions are detailed enough for beginners to understand them, but thi
 - Building an executing a Docker container
 
 If you're ambitious, I won't stop you, but be extremely careful about billing!
-
 
 
 ## Initialize GitHub Project

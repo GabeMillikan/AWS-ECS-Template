@@ -8,5 +8,7 @@ services:
     build:
       context: .
       dockerfile: .docker/nginx.Dockerfile
+      args:
+        FASTAPI_SERVER: fastapi:8000
     ports:
       - "80:80"
