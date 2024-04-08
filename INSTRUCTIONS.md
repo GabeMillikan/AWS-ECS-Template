@@ -1,4 +1,5 @@
 todo: explain variables + uncomment workflow steps
+todo: fix local env (localhost/fastapi name issue)
 
 ## Table of Contents
 
