@@ -420,6 +420,7 @@ todo: explain how the aws layout works
 8. Grant migration permissions
     - note: _without_ permission for access to data within tables
     - `GRANT ALL PRIVILEGES ON SCHEMA public TO migrator;`
+9. TODO: explain how to `init-db` and why this is an aerich-specific problem
 
 ## Setup Production SSH Connection
 

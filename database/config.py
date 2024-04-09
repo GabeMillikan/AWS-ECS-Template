@@ -1,6 +1,12 @@
+import os
+
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgresql:5432")
+POSTGRES_AUTH = os.getenv("POSTGRES_AUTH", "username:password")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "database")
+
 TORTOISE_ORM = {
     "connections": {
-        "default": "postgresql://dev:insecure-local-only@dev:5432/dev",  # todo pull from ENV
+        "default": f"postgres://{POSTGRES_AUTH}@{POSTGRES_HOST}/{POSTGRES_DB}",
     },
     "apps": {
         "models": {

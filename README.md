@@ -19,9 +19,39 @@ I provide no guarantee regarding the quality of this guide, I am simply document
 The _minimum_ price for this server setup is in the ballpark of $35/mo (although, by disabling some options, $7/mo is possible). For small websites (<100,000 requests a day), it will likely not exceed $60/mo. You can more accurately gauge the price using the [AWS Pricing Calculator](https://calculator.aws/) (it's not "easy" to use, which is why I include the aforementioned estimate).
 
 Every resource we create in this guide will have a link to detailed pricing information (TODO: actually do this), but here's a quick, rough breakdown:
-- **ECS**: $7/mo for the smallest task
-- **EC2**: $16/mo for a load balancer (lower quality workaround: free)
-- **RDS**: $10/mo for the smallest Postgres database (lower quality workaround: free)
+TODO: format this better
+ECR:
+	storage:
+		- $0.10 per GB / month
+
+	estimate:
+		- 10 GB = $1.00 / month
+ECS:
+	vCPU:
+		- $0.04048 / vCPU / hour
+	memory:
+		- $0.004445 / GB / hour
+	ip:
+		- $0.005 / task / hour
+
+	estimate:
+		- 1 task, 0.25 vCPU, 0.5 GB = $12.49 / month
+RDS:
+	db.t4g.micro instance:
+		- $0.016 / hour
+	ip:
+		- $0.005 / hour
+
+	estimate:
+		- $15.12 / month
+ELB:
+	flat rate:
+		- $0.0225 / hour
+	LCUs:
+		- $0.008 / lcu / hour
+
+	estimate:
+		- 0.25 LCU = $17.64 / month
 
 > [!IMPORTANT]  
 > AWS will happily bill you for thousands of dollars if you accidentally scale up your server (or get attacked without autoscaling limits). Be careful, check your bill frequently and make sure you have reasonable scaling limits (covered in this guide)!
