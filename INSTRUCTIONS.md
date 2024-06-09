@@ -49,19 +49,19 @@ todo: explain how the aws layout works
     - Note that throughout this guide, you will keep this constant. If something ever seems to "disappear" after you created it, it's probably because you accidentally switched to a new region. (except for some resources that aren't region-specific, where the dropdown will display "Global")
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/select-region.png" width="350px"/>
+        <img src="./.github/readme-images/select-region.png" width="350px"/>
     </details>
 4. Use the search bar to find the VPC service
     - Stands for "Virtual Private Cloud"
     - We'll be using it to create a LAN network to contain all of our servers, the database, etc.
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/searchbar-vpc.png" height="150px"/>
+        <img src="./.github/readme-images/searchbar-vpc.png" height="150px"/>
     </details>
 5. Go to "Your VPCs"
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/your-vpcs.png" width="150px"/>
+        <img src="./.github/readme-images/your-vpcs.png" width="150px"/>
     </details>
 6. Click "Create VPC"
     - in the upper right
@@ -69,7 +69,7 @@ todo: explain how the aws layout works
     <details>
         <summary>See Image</summary>
         It's okay if you already have a VPC here, just create another one.
-        <img src="./.readme-images/create-vpc.png" height="150px"/>
+        <img src="./.github/readme-images/create-vpc.png" height="150px"/>
     </details>
 7. Configure your VPC, then hit "Create VPC"
     - Select "Create VPC and More", since we want to configure subnets.
@@ -79,7 +79,7 @@ todo: explain how the aws layout works
     - Do not create any NAT gateways or S3 endpoints, they're pricy and we won't use them.
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/vpc-configuration.png"/>
+        <img src="./.github/readme-images/vpc-configuration.png"/>
     </details>
 8. Create ECR Repositories
     - Go to ECR -> Private Registry -> Repositories
@@ -87,8 +87,8 @@ todo: explain how the aws layout works
     - I will create private repositories named `template-guide-nginx` and `template-guide-fastapi`, but you may choose to publish them (if you know what you're doing).
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/create-ecr-repo.png" height="600px"/><br>
-        <img src="./.readme-images/created-ecr-repos.png"/>
+        <img src="./.github/readme-images/create-ecr-repo.png" height="600px"/><br>
+        <img src="./.github/readme-images/created-ecr-repos.png"/>
     </details>
 
 ## Upload Images to ECR (via GitHub Actions)
@@ -101,7 +101,7 @@ todo: explain how the aws layout works
         - select `AmazonEC2ContainerRegistryFullAccess` (to enable read and write access to your ECR repositories)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/iam-gh-actions-review.png" width="600px"/>
+        <img src="./.github/readme-images/iam-gh-actions-review.png" width="600px"/>
     </details>
 2. Create an Access Key for the IAM User
     - click into your newly created user
@@ -114,14 +114,14 @@ todo: explain how the aws layout works
     - If you've ignored the above note, then delete the access key and start over.
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/iam-create-access-key.png" width="600px"/>
+        <img src="./.github/readme-images/iam-create-access-key.png" width="600px"/>
     </details>
 3. Open repository settings
     - Visit your repository on github.com
     - go to the "Settings" tab at the top (i.e. to the right of the Code/Issues/Pull Requests tabs)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/github-repository-settings-tab.png" width="450px"/>
+        <img src="./.github/readme-images/github-repository-settings-tab.png" width="450px"/>
     </details>
 4. Add repository secrets
     - Navigate to Secrets -> Secrets and Variables -> Actions -> New repository secret
@@ -137,9 +137,24 @@ todo: explain how the aws layout works
     - (note: you can close that tab now)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/gh-add-repo-secret.png" width="450px"/>
+        <img src="./.github/readme-images/gh-add-repo-secret.png" width="450px"/>
     </details>
-5. Update and trigger CI (TODO: update this step once the repository is finished, since the line numbers will move + images will look different; the build will fail)
+5. Add repository variables
+    - Switch to the "Variables" tab
+    - First, the AWS region
+        - name: `AWS_REGION`
+        - value: `us-east-2` or whatever region you're using
+    - Then, the name of the ECR repository for NGINX
+        - name: `AWS_ECR_NGINX_REPO` 
+        - value: `template-guide-nginx` or whatever you named it
+    - Finally, the name of the ECR repository for FastAPI
+        - name: `AWS_ECR_FASTAPI_REPO` 
+        - value: `template-guide-fastapi` or whatever you named it
+    <details>
+        <summary>See Image</summary>
+        <img src="./.github/readme-images/gh-add-repo-variables.png" width="450px"/>
+    </details>
+5. Update and trigger CI
     - Update the repository names in [build.yml](.github/workflows/build.yml)
     - for example, update line 35 by replacing `template-guide-fastapi` to whatever you named your ECR repository
     - do the same for NGINX
@@ -150,9 +165,9 @@ todo: explain how the aws layout works
     - Note that the deployment step "Force new ECS Service deployment" _should_ fail, since we haven't setup the ECS cluster yet. We will come back to this later!
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/gh-ci-build-verify-1.png" width="400px"/><br>
-        <img src="./.readme-images/gh-ci-build-verify-2.png" width="400px"/><br>
-        <img src="./.readme-images/gh-ci-build-verify-3.png" width="400px"/>
+        <img src="./.github/readme-images/gh-ci-build-verify-1.png" width="400px"/><br>
+        <img src="./.github/readme-images/gh-ci-build-verify-2.png" width="400px"/><br>
+        <img src="./.github/readme-images/gh-ci-build-verify-3.png" width="400px"/>
     </details> 
 6. Verify images are visible in ECR
     - Go back to ECR -> Private Registry -> Repositories
@@ -161,7 +176,7 @@ todo: explain how the aws layout works
     - TODO: auto-delete old images so that S3 space isn't wasted?
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/ecr-latest-image-uploaded.png" width="600px"/>
+        <img src="./.github/readme-images/ecr-latest-image-uploaded.png" width="600px"/>
     </details> 
 
 ## Setup Security Groups
@@ -176,7 +191,7 @@ todo: explain how the aws layout works
     - TODO: restrict outbound to ecs only?
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/sg-load-balancer.png" width="600px"/>
+        <img src="./.github/readme-images/sg-load-balancer.png" width="600px"/>
     </details> 
 2. Create security group for your servers (aka ECS Tasks)
     - Your tasks will accept inbound traffic from the load balancer
@@ -190,7 +205,7 @@ todo: explain how the aws layout works
     - TODO: can probably disable all outbound traffic?
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/sg-ecs-tasks.png" width="600px"/>
+        <img src="./.github/readme-images/sg-ecs-tasks.png" width="600px"/>
     </details>
 
 ## Create an ECS Cluster
@@ -208,9 +223,9 @@ todo: explain how the aws layout works
         - leave the default description: "Allows ECS tasks to call AWS services on your behalf." (you could probably change it, but why bother?)
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/iam-role-ecr-1.png" width="400px"/><br>
-        <img src="./.readme-images/iam-role-ecr-2.png" width="400px"/><br>
-        <img src="./.readme-images/iam-role-ecr-3.png" width="400px"/>
+        <img src="./.github/readme-images/iam-role-ecr-1.png" width="400px"/><br>
+        <img src="./.github/readme-images/iam-role-ecr-2.png" width="400px"/><br>
+        <img src="./.github/readme-images/iam-role-ecr-3.png" width="400px"/>
     </details> 
 2. Create a Task Definition
     - A "task" is a server (for this application). Multiple tasks can exist simultaneously (i.e. horizontal scaling).
@@ -230,7 +245,7 @@ todo: explain how the aws layout works
         - enable the default log collection, it's basically free (todo)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/create-task-definition.png" width="500px"/>
+        <img src="./.github/readme-images/create-task-definition.png" width="500px"/>
     </details> 
 3. Create Cluster
     - ECS -> Clusters -> Create cluster
@@ -255,8 +270,8 @@ todo: explain how the aws layout works
     - On the next page, delete any IPs that were automatically added. The load balancer will be able to automatically find the tasks that are in this VPC.
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/target-group-1.png" width="400px"/><br>
-        <img src="./.readme-images/target-group-2.png" width="400px"/>
+        <img src="./.github/readme-images/target-group-1.png" width="400px"/><br>
+        <img src="./.github/readme-images/target-group-2.png" width="400px"/>
     </details> 
 2. Create a Load Balancer
     - EC2 -> Load Balancers -> Create Load Balancer -> Application Load Balancer
@@ -268,8 +283,8 @@ todo: explain how the aws layout works
     - Hit create, and wait until its "Status" is "Active". This will take a few minutes, take a much-needed break!
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/load-balancer.png" width="400px"/><br>
-        <img src="./.readme-images/load-balancer-active.png" width="550px"/>
+        <img src="./.github/readme-images/load-balancer.png" width="400px"/><br>
+        <img src="./.github/readme-images/load-balancer-active.png" width="550px"/>
     </details> 
 
 ## Create an ECS Service
@@ -308,7 +323,7 @@ todo: explain how the aws layout works
     - Wait for both tasks to be "Running" (this is the most likely failure point, there are a million things that can go wrong here and logs are useless! If you followed the guide exactly, you should get green status. Double check everything!)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/running-tasks.png" width="600px"/>
+        <img src="./.github/readme-images/running-tasks.png" width="600px"/>
     </details> 
 3. Verify Load Balancer is working
     - Go to EC2 -> Load Balancers
@@ -317,7 +332,7 @@ todo: explain how the aws layout works
     - you should see two healthy targets on the right (these are your two servers!)
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/lb-healthy-targets.png" width="600px"/>
+        <img src="./.github/readme-images/lb-healthy-targets.png" width="600px"/>
     </details> 
 4. Test web server
     - Copy the DNS name from the load balancer (on the same page from step 3)
@@ -343,8 +358,8 @@ todo: explain how the aws layout works
     - Ensure that ECS spawns additional tasks. Wait for the stress to die down, and verify that ECS deactivates some tasks. (this will take several minutes)
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/high-cpu-util.png" width="600px"/><br>
-        <img src="./.readme-images/autoscale-adds-new-task.png" width="600px"/>
+        <img src="./.github/readme-images/high-cpu-util.png" width="600px"/><br>
+        <img src="./.github/readme-images/autoscale-adds-new-task.png" width="600px"/>
     </details> 
 
 ## Enable Auto-Deployment
@@ -364,8 +379,8 @@ todo: explain how the aws layout works
     - Give your policy a name, like "ECSAllowNewDeployments"
     <details>
         <summary>See Images</summary>
-        <img src="./.readme-images/iam-gh-deployments-1.png" width="600px"/><br>
-        <img src="./.readme-images/iam-gh-deployments-2.png" width="600px"/>
+        <img src="./.github/readme-images/iam-gh-deployments-1.png" width="600px"/><br>
+        <img src="./.github/readme-images/iam-gh-deployments-2.png" width="600px"/>
     </details> 
 2. TODO: verify successful deployment
 
@@ -393,7 +408,7 @@ todo: explain how the aws layout works
     - wait for its status to turn green
     <details>
         <summary>See Image</summary>
-        <img src="./.readme-images/rds-create-db.png" width="400px"/>
+        <img src="./.github/readme-images/rds-create-db.png" width="400px"/>
     </details>
 3. Connect to the database via psql
     - install `psql` for example from [EDB](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
