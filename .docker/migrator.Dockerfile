@@ -10,4 +10,4 @@ COPY database database
 COPY pyproject.toml pyproject.toml
 
 # migrate
-ENTRYPOINT [ "aerich", "migrate" ]
+ENTRYPOINT [ "aerich", "upgrade" ]

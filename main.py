@@ -3,8 +3,17 @@ import time
 from datetime import datetime, timezone
 
 from fastapi import FastAPI
+from tortoise.contrib.fastapi import register_tortoise
+
+import database
 
 app = FastAPI(root_path="/api")
+
+register_tortoise(
+    app,
+    config=database.TORTOISE_ORM,
+    add_exception_handlers=True,
+)
 
 
 @app.get("/")
