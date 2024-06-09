@@ -20,6 +20,7 @@ The _minimum_ price for this server setup is in the ballpark of $35/mo (although
 
 Every resource we create in this guide will have a link to detailed pricing information (TODO: actually do this), but here's a quick, rough breakdown:
 TODO: format this better
+```
 ECR:
 	storage:
 		- $0.10 per GB / month
@@ -52,6 +53,7 @@ ELB:
 
 	estimate:
 		- 0.25 LCU = $17.64 / month
+```
 
 > [!IMPORTANT]  
 > AWS will happily bill you for thousands of dollars if you accidentally scale up your server (or get attacked without autoscaling limits). Be careful, check your bill frequently and make sure you have reasonable scaling limits (covered in this guide)!
