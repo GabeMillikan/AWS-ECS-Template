@@ -1,4 +1,4 @@
-name: Build and Push Docker images
+name: Build Images, Migrate Database, and Deploy ECS Service
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-migrate-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
