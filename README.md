@@ -58,7 +58,7 @@ ELB:
 > [!IMPORTANT]  
 > AWS will happily bill you for thousands of dollars if you accidentally scale up your server (or get attacked without autoscaling limits). Be careful, check your bill frequently and make sure you have reasonable scaling limits (covered in this guide)!
 
-## Setup Instructions
+## AWS Setup Instructions
 See [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 Estimated time:
@@ -66,3 +66,8 @@ Estimated time:
 - surface level understanding of how services interconnect: **3 hours**
 - in-depth understanding: **8 hours** (or more - the AWS hole goes **DEEP**)
 - how long it took me, without an up-to-date guide: 16-20 hours (plus some time to document the process here)
+
+## Local Setup
+1. Install Docker 
+2. Run `docker compose up --build`
+3. Visit http://localhost/

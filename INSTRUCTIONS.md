@@ -155,14 +155,8 @@ todo: explain how the aws layout works
         <img src="./.github/readme-images/gh-add-repo-variables.png" width="450px"/>
     </details>
 5. Update and trigger CI
-    - Update the repository names in [build.yml](.github/workflows/build.yml)
-    - for example, update line 35 by replacing `template-guide-fastapi` to whatever you named your ECR repository
-    - do the same for NGINX
-    - commit the changes to the `main` branch
-    - on github.com, verify that the build + upload tasks succeed:
-        - step "Build FastAPI and push to ECR"
-        - step "Build NGINX and push to ECR"
-    - Note that the deployment step "Force new ECS Service deployment" _should_ fail, since we haven't setup the ECS cluster yet. We will come back to this later!
+    - Commit any change to the `main` branch of the repository, to trigger the build action
+    - Ensure that the build jobs succeed, though the migrate & deploy jobs should fail (TODO: take new screenshot where the migrate job actually fails)
     <details>
         <summary>See Images</summary>
         <img src="./.github/readme-images/gh-ci-build-verify-1.png" width="400px"/><br>
@@ -187,8 +181,7 @@ todo: explain how the aws layout works
     - I will name mine `template-guide-load-balancer-sg`
     - Description along the lines of "Allows inbound internet TCP traffic on port 80." TODO: 22, 443, icmp?
     - Select the VPC you created earlier, mine is named `template-guide-vpc`
-    - Add a inbound rules to allow TCP traffic on port 80 from any ipv4 or ipv6 address (unless you have a good reason to discriminate).
-    - TODO: restrict outbound to ecs only?
+    - Add inbound rules to allow TCP traffic on port 80 from any ipv4 or ipv6 address (unless you have a good reason to discriminate).
     <details>
         <summary>See Image</summary>
         <img src="./.github/readme-images/sg-load-balancer.png" width="600px"/>
@@ -202,7 +195,6 @@ todo: explain how the aws layout works
     - Add an inbound rule allowing all traffic from the security group created in the above step.
         - Type: All Traffic
         - Source: Custom, and search for the name of the load balancer security group
-    - TODO: can probably disable all outbound traffic?
     <details>
         <summary>See Image</summary>
         <img src="./.github/readme-images/sg-ecs-tasks.png" width="600px"/>
@@ -236,13 +228,19 @@ todo: explain how the aws layout works
     - Task Size: Start small, you can increase this later.
     - Task role: None (TODO: pretty sure this needs to be something to access RDS)
     - Task Execution Role: `ecsTaskExecutionRole` (from step 1)
-    - TODO: update container 1/2 after finishing the repository
     - Container 1:
         - Name: `fastapi`
         - Image URI: go to ECR and copy the URI of the `latest` image (make sure it includes `:latest` tag at the end)
         - Note that you _do not_ need to enable "Private registry authentication" (despite the fact that your repository is private)
-        - port mappings: 8081 / TCP / HTTP (todo)
-        - enable the default log collection, it's basically free (todo)
+        - port mappings: 8081 / TCP / HTTP
+        - enable the default log collection, it's basically free
+    - Add another container:
+        - Name: `nginx`
+        - Image URI: copy the `latest` URI, like for fastapi
+        - Essential container: Yes
+        - port mappings: 80 / TCP / HTTP
+        - enable the default log collection, it's basically free
+    - TODO: health checks?
     <details>
         <summary>See Image</summary>
         <img src="./.github/readme-images/create-task-definition.png" width="500px"/>
@@ -261,12 +259,13 @@ todo: explain how the aws layout works
     - > [IMPORTANT!]
       > Select "IP Addresses"
     - I will name this group `template-guide-tasks-tg`
-    - Protocol : port = HTTP : 80
-    - (TODO: also create a TG for 443? or handle cert at AWS level?)
+    - protocol: HTTP
+    - port: 80
+    - (TODO: also create a TG for 443? tls offloading?)
     - IP Address Type: IPv4
     - VPC: the one you created, mine is `template-guide-vpc`
     - Protocol version: HTTP1 (since the load balancer is capable of downgrading HTTP/2 requests to HTTP/1.1)
-    - Health Checks: leave at default `/` (TODO: build an actual healthcheck endpoint?)
+    - Health check path: `/api/health`
     - On the next page, delete any IPs that were automatically added. The load balancer will be able to automatically find the tasks that are in this VPC.
     <details>
         <summary>See Images</summary>
@@ -293,9 +292,9 @@ todo: explain how the aws layout works
     - The service is responsible for facilitating the creation of tasks within the cluster
     - click on your cluster -> Services -> Create (at the bottom of the page)
     - Environment
-        - Compute Configuration: Fargate
+        - Compute options: Launch type
         - Launch type: Fargate
-        - Platform version: Fargate
+        - Platform version: LATEST
     - Deployment Configuration
         - Application type: Service 
         - Family: Select the task definition created in step 2
@@ -306,21 +305,27 @@ todo: explain how the aws layout works
         - VPC: choose your VPC, mine is `template-guide-vpc`
         - Subnets: choose all of the public ones (all of them, if you didn't create private subnets)
         - Use an existing security group: the one you created for ECS tasks. Mine is called `template-guide-ecs-tasks-sg`. Deselect any default groups.
-        - Enable Public IP (note that the security group disallows all incoming internet traffic - this is used exclusively for outbound requests to ECR for fetching container images)
+        - Enable Public IP (note that the security group disallows all incoming internet traffic - this is used exclusively for outbound requests to ECR for fetching container images) (TODO: really? this is ridiculous... why is it even possible to disable the public IP, then?)
     - Load Balancing
         - Load balancer type: Application Load Balancer
-        - container: fastapi 8081:8081 (todo: should this be nginx :80 or :443?)
+        - container: nginx 80:80
         - use an existing load balancer: the one you created, mine is `template-guide-load-balancer`
-        - use an existing listener: the one you created, HTTP:80 (TODO: 443?)
+        - use an existing listener: the one you created, HTTP:80
         - use an existing target group: the one you created, mine is `template-guide-tasks-tg`
     - click "Create"
     - wait for it to show up in the service list
+    <details>
+        <summary>See Image</summary>
+        <img src="./.github/readme-images/create-service.png" width="600px"/>
+    </details> 
 2. Verify tasks spawn successfully
     - click on your service
     - click on the "Tasks" tab near the top
     - You should see two tasks (since we set the desired task count to 2)
     - At the top of the filters, set "Filter desired status" to "Any desired status" (so we can see if any tasks fail unexpectedly)
-    - Wait for both tasks to be "Running" (this is the most likely failure point, there are a million things that can go wrong here and logs are useless! If you followed the guide exactly, you should get green status. Double check everything!)
+    - Wait for both tasks to be "Running"
+        - This is the most likely failure point in the whole guide. There are a million things that can go wrong, and the logs are not helpful / don't exist.
+        - Try reading this: https://repost.aws/knowledge-center/ecs-unable-to-pull-secrets
     <details>
         <summary>See Image</summary>
         <img src="./.github/readme-images/running-tasks.png" width="600px"/>

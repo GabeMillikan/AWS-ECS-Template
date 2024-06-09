@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: .docker/nginx.Dockerfile
       args:
-        FASTAPI_SERVER: fastapi:8000
+        FASTAPI_SERVER: fastapi:8081
     ports:
       - "80:80"
     depends_on:

@@ -24,6 +24,11 @@ async def root() -> dict:
     }
 
 
+@app.get("/health")
+async def health() -> dict:
+    return {"todo": "include more information here"}
+
+
 @app.get("/stress")
 async def stress(duration: float = 5.0) -> dict:
     started_at = time.perf_counter()
