@@ -108,7 +108,7 @@ todo: explain how the aws layout works
     - click "Create access key"
     - Select "Third-party service" as your use case (GitHub is a third-party)
     - Confirm that you understand creating permanent access keys is not good practice, and hit Next. Otherwise, please figure out how to use IAM Roles and open a PR to update this guide.
-    - A good description is something like "Authorizes GitHub Actions for GabeMillikan/AWS-ECS-Template to upload ECR images.". Be specific to avoid confusion later.
+    - A good description is something like "Authorizes GitHub Actions for GabeMillikan/AWS-ECS-Template to upload ECR images and update ECS clusters.". Be specific to avoid confusion later.
     - > [!NOTE]
       > Do not navigate away from the page, you'll need it in step 4.
     - If you've ignored the above note, then delete the access key and start over.
@@ -126,11 +126,11 @@ todo: explain how the aws layout works
 4. Add repository secrets
     - Navigate to Secrets -> Secrets and Variables -> Actions -> New repository secret
     - first, the public access key
-        - name: `AWS_ECR_ACCESS_KEY_ID`
+        - name: `AWS_ACCESS_KEY_ID`
         - secret: copy the "access key" from your AWS tab from step 2
         - should look similar to "AKRJEAYGZSIBQ5MTQGT2"
     - then, the private secret access key
-        - name: `AWS_ECR_ACCESS_KEY_SECRET`
+        - name: `AWS_ACCESS_KEY_SECRET`
         - secret: copy the "secret access key" from your AWS tab from step 2
         - should look similar to "Gdyz07K+o1DH7duB0W4gwFrxNnzRtLXAUVCYZK+h" 
     - (note that the above examples are randomly generated and not real keys, obviously)
@@ -387,7 +387,16 @@ todo: explain how the aws layout works
         <img src="./.github/readme-images/iam-gh-deployments-1.png" width="600px"/><br>
         <img src="./.github/readme-images/iam-gh-deployments-2.png" width="600px"/>
     </details> 
-2. TODO: verify successful deployment
+2. Add repository variables for ECS identifiers
+    - Exactly like before
+    - First, the name of your ECS cluster
+        - name: `AWS_ECS_CLUSTER_NAME` 
+        - value: `template-guide-cluster` or whatever you named it
+    - Then, the name of your ECS service
+        - name: `AWS_ECS_SERVICE_NAME` 
+        - value: `template-guide-service` or whatever you named it
+3. Push a change to the `main` branch, and verify that the `deploy` step succeeds
+4. Verify that a new deployment on AWS succeeds, and test that your new code is live (TODO: this won't work since the migrate step is failing)
 
 ## Setup Database
 
