@@ -15,11 +15,11 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
+    - name: Configure Amazon ECR credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_ECR_ACCESS_KEY_SECRET }}
         aws-region: us-east-2
 
     - name: Login to Amazon ECR
@@ -43,6 +43,9 @@ jobs:
         tags: ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_NGINX_REPO }}:latest
         build-args: |
           FASTAPI_SERVER=localhost:8000
+
+    - name: Migrate database
+      run: echo "TODO"
 
     - name: Deploy to Amazon ECS
       run: |
