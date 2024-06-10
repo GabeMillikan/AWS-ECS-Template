@@ -3,3 +3,4 @@ gunicorn
 uvicorn[standard]
 tortoise-orm[asyncpg]
 aerich
+psutil

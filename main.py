@@ -1,7 +1,11 @@
 import asyncio
+import os
+import random
+import threading
 import time
 from datetime import datetime, timezone
 
+import psutil
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
@@ -26,19 +30,34 @@ async def root() -> dict:
 
 @app.get("/health")
 async def health() -> dict:
-    return {"todo": "include more information here"}
+    return {
+        "cpu_usage": psutil.cpu_percent(interval=0.25),
+        "memory": psutil.virtual_memory()._asdict(),
+        "swap": psutil.swap_memory()._asdict(),
+        "disk": psutil.disk_usage("/")._asdict(),
+        "load_avg": psutil.getloadavg(),
+        "uptime": time.time() - psutil.boot_time(),
+        "network": psutil.net_io_counters()._asdict(),
+        "active_processes": len(psutil.pids()),
+        "active_threads": sum([len(p.threads()) for p in psutil.process_iter()]),
+        "id": {"process": os.getpid(), "thread": threading.get_native_id()},
+    }
 
 
 @app.get("/stress")
-async def stress(duration: float = 5.0) -> dict:
-    started_at = time.perf_counter()
-    n = 0
-    while time.perf_counter() - started_at < duration:
-        n += 1
-        if n % 10_000 == 0:
-            await asyncio.sleep(0)
+async def stress(duration: float = 15.0) -> dict:
+    def cpu_intensive_wait() -> int:
+        stop_at = time.perf_counter() + duration
 
+        result = 0
+        while time.perf_counter() < stop_at:
+            big = sum(2**i for i in range(random.randint(10, 100)))
+            result += big
+            result %= 1_000_000
+
+        return result
+
+    _ = asyncio.create_task(asyncio.to_thread(cpu_intensive_wait))
     return {
-        "n": n,
-        "note": "add a `?duration={seconds}` parameter to increase the delay",
+        "message": f"A new thread has spawned and will block for {duration} second(s).",
     }
