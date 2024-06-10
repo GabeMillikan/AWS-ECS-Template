@@ -1,4 +1,3 @@
-import asyncio
 import multiprocessing
 import os
 import random
@@ -29,10 +28,25 @@ async def root() -> dict:
     }
 
 
+cpu_usage = 0
+
+
+def update_cpu_usage(interval: float = 3.0) -> None:
+    global cpu_usage
+    while True:
+        usage = psutil.cpu_percent(interval)
+        cpu_usage = usage
+
+
+cpu_monitoring_thread = threading.Thread(target=update_cpu_usage)
+cpu_monitoring_thread.daemon = True  # to ensure it exits when the process exits
+cpu_monitoring_thread.start()
+
+
 @app.get("/health")
 async def health() -> dict:
     return {
-        "cpu_usage": psutil.cpu_percent(interval=0.25),
+        "cpu_usage": cpu_usage,
         "memory": psutil.virtual_memory()._asdict(),
         "swap": psutil.swap_memory()._asdict(),
         "disk": psutil.disk_usage("/")._asdict(),

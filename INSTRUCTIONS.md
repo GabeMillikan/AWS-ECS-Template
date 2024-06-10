@@ -354,8 +354,8 @@ todo: explain how the aws layout works
     - use target tracking (it's easier)
     - set minimum tasks to 1, maximum tasks to whatever you're willing to pay for (start with a small number to ensure things are working as expected)
     - ECS service metric: I will use average CPU utilization
-    - Target value: I will use 50 (i.e. spawn more tasks until CPU utilization is <50%)
-    - Leave the default scaling periods at 5 minutes (they just help prevent overcorrection) 
+    - Target value: I will use 70 (i.e. spawn more tasks until CPU utilization is <70%)
+    - Leave the default scaling period at 5 minutes (they just help prevent overcorrection) 
 7. Verify that the new scale is in place
     - ECS -> Clusters -> your cluster -> your service -> tasks
     - you should see only one tasks (since there is no load)
