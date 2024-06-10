@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import os
 import random
 import threading
@@ -46,7 +47,7 @@ async def health() -> dict:
 
 @app.get("/stress")
 async def stress(duration: float = 15.0) -> dict:
-    def cpu_intensive_wait() -> int:
+    def cpu_intensive_wait(duration: float) -> int:
         stop_at = time.perf_counter() + duration
 
         result = 0
@@ -57,7 +58,10 @@ async def stress(duration: float = 15.0) -> dict:
 
         return result
 
-    _ = asyncio.create_task(asyncio.to_thread(cpu_intensive_wait))
+    proc = multiprocessing.Process(target=cpu_intensive_wait, args=(duration,))
+    proc.start()
+
     return {
-        "message": f"A new thread has spawned and will block for {duration} second(s).",
+        "message": f"A new process has spawned and will block for {duration} second(s).",
+        "process_id": proc.pid,
     }
