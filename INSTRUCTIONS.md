@@ -441,15 +441,17 @@ todo: explain how the aws layout works
     - note: _without_ permission for schema changes i.e. dropping columns
     - `GRANT CONNECT ON DATABASE prod TO api;`
     - `GRANT USAGE ON SCHEMA public TO api;`
-    - `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO api;`
-    - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api;`
 7. Create a user for migrations
     - I will name mine `migrator`
     - I will use the password `P4SSW0RD`; you should pick something secure
     - `CREATE USER migrator WITH PASSWORD 'P4SSW0RD';`
 8. Grant migration permissions
-    - note: _without_ permission for access to data within tables
     - `GRANT ALL PRIVILEGES ON SCHEMA public TO migrator;`
+9. Grant `api` access to `migrator`'s tables
+    - login as the migrator: `\c prod migrator`
+    - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api;`
+    - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO api;`
+    - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO api;`
 9. Add repository secrets
     - Much like before
     - first, the connection information for the API user:
