@@ -21,9 +21,7 @@ services:
       context: .
       dockerfile: .docker/migrator.Dockerfile
     environment:
-      POSTGRES_HOST: "postgresql:5432"
-      POSTGRES_AUTH: "dev:insecure-local-only"
-      POSTGRES_DB: "dev"
+      DB_CONNECTION_STRING: "postgres://dev:insecure-local-only@postgresql:5432/dev"
     depends_on:
       postgresql:
         condition: service_healthy

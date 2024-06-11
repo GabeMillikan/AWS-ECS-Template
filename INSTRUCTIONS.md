@@ -407,6 +407,7 @@ todo: explain how the aws layout works
     - Add rules:
         - PostgreSQL, All IPv4
         - PostgreSQL, All IPv6
+    - If you want to, you can only enable access your ECS Task security group, but then it's kind of annoying to connect to manually.
 2. Create RDS database
     - RDS -> Databases -> Create database
     - Standard create
@@ -416,8 +417,8 @@ todo: explain how the aws layout works
     - Self managed password, auto generate
     - Don't setup a connection
     - Select your VPC, mine is `template-guide-vpc`
-    - enable public access (todo: can we disable this?)
-    - choose your security group from step (1), remove existing group
+    - enable public access (todo: explain how this can be disabled if you don't want to connect manually)
+    - choose your security group from step (1)
     - hit create, and make note of the password
     - wait for its status to turn green
     <details>
@@ -448,7 +449,7 @@ todo: explain how the aws layout works
 8. Grant migration permissions
     - note: _without_ permission for access to data within tables
     - `GRANT ALL PRIVILEGES ON SCHEMA public TO migrator;`
-9. TODO: explain how to `init-db` and why this is an aerich-specific problem
+9. Test (todo)
 
 ## Setup Production SSH Connection
 
