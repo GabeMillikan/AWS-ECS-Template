@@ -440,6 +440,7 @@ todo: explain how the aws layout works
 6. Grant the api user full access to data within the database
     - note: _without_ permission for schema changes i.e. dropping columns
     - `GRANT CONNECT ON DATABASE prod TO api;`
+    - `GRANT USAGE ON SCHEMA public TO api;`
     - `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO api;`
     - `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api;`
 7. Create a user for migrations
