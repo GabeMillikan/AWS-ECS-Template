@@ -438,7 +438,6 @@ todo: explain how the aws layout works
     - I will use the password `p4ssw0rd`; you should pick something secure
     - `CREATE USER api WITH PASSWORD 'p4ssw0rd';`
 6. Grant the api user full access to data within the database
-    - note: _without_ permission for schema changes i.e. dropping columns
     - `GRANT CONNECT ON DATABASE prod TO api;`
     - `GRANT USAGE ON SCHEMA public TO api;`
 7. Create a user for migrations
