@@ -4,6 +4,7 @@ import requests
 from fastapi.exceptions import HTTPException
 
 from backend.app import app
+from database.config import CONNECTION_URL
 
 
 @app.get("/debug-internet")
@@ -16,6 +17,7 @@ async def debug_internet(url: str) -> dict:
     return {
         "status": response.status_code,
         "text": response.text,
+        "penis": CONNECTION_URL,
     }
 
 
