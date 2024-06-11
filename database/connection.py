@@ -1,4 +1,4 @@
-from typing import Annotated, AsyncGenerator
+from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -21,11 +21,4 @@ async def start_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-try:
-    from fastapi import Depends
-
-    SessionDependency = Annotated[AsyncSession, Depends(start_async_session)]
-except ImportError:
-    __all__ = ["AsyncSessionLocal"]
-else:
-    __all__ = ["SessionDependency", "AsyncSessionLocal"]
+__all__ = ["AsyncSessionLocal", "start_async_session"]
