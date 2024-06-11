@@ -232,7 +232,7 @@ todo: explain how the aws layout works
         - Name: `fastapi`
         - Image URI: go to ECR and copy the URI of the `latest` image (make sure it includes `:latest` tag at the end)
         - Note that you _do not_ need to enable "Private registry authentication" (despite the fact that your repository is private)
-        - port mappings: 8081 / TCP / HTTP
+        - port mappings: 8000 / TCP / HTTP
         - enable the default log collection, it's basically free
     - Add another container:
         - Name: `nginx`

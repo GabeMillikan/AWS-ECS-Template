@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  postgresql:
+  database:
     image: postgres:16-bookworm
     environment:
       POSTGRES_DB: dev
@@ -16,31 +16,52 @@ services:
       timeout: 3s
       retries: 3
       start_period: 1s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 250M
   migrator:
     build:
       context: .
       dockerfile: .docker/migrator.Dockerfile
     environment:
-      DB_CONNECTION_STRING: "postgres://dev:insecure-local-only@postgresql:5432/dev"
+      DATABASE_CONNECTION_STRING: "dev:insecure-local-only@database:5432/dev"
     depends_on:
-      postgresql:
+      database:
         condition: service_healthy
-  fastapi:
+  backend:
     build:
       context: .
-      dockerfile: .docker/fastapi.Dockerfile
+      dockerfile: .docker/backend.Dockerfile
+    volumes:
+      - .:/web
+    entrypoint: uvicorn
+    command: backend:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       migrator:
         condition: service_completed_successfully
+    environment:
+      DATABASE_CONNECTION_STRING: "dev:insecure-local-only@database:5432/dev"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
   nginx:
     build:
       context: .
       dockerfile: .docker/nginx.Dockerfile
       args:
-        FASTAPI_SERVER: fastapi:8081
+        BACKEND_SERVER: backend:8000
     ports:
       - "80:80"
     depends_on:
-      - fastapi
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 25M
 volumes:
   postgres_data:

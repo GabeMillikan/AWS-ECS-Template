@@ -1,18 +1,10 @@
 import os
 
-DB_CONNECTION_STRING = os.getenv(
-    "DB_CONNECTION_STRING",
-    "postgres://username:password@postgresql:5432/database",
+CONNECTION_STRING = os.getenv(
+    "DATABASE_CONNECTION_STRING",
+    "username:password@postgresql:5432/database",
 )
+CONNECTION_URL = f"postgresql+asyncpg://{CONNECTION_STRING}"
 
-TORTOISE_ORM = {
-    "connections": {
-        "default": DB_CONNECTION_STRING,
-    },
-    "apps": {
-        "models": {
-            "models": ["database.models", "aerich.models"],
-            "default_connection": "default",
-        },
-    },
-}
+
+__all__ = ["CONNECTION_URL"]

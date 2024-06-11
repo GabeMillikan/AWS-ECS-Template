@@ -3,11 +3,13 @@ WORKDIR /web
 
 # install tortiose + aerich
 RUN python -m pip install --upgrade pip
-RUN pip install tortoise-orm[asyncpg] aerich
+RUN pip install sqlalchemy alembic asyncpg pydantic
+
 
 # copy migration files
 COPY database database
-COPY pyproject.toml pyproject.toml
+COPY alembic.ini alembic.ini
 
-# migrate
-ENTRYPOINT [ "aerich", "upgrade" ]
+# upgrade
+ENTRYPOINT ["alembic", "upgrade", "head"]
+
