@@ -449,7 +449,14 @@ todo: explain how the aws layout works
 8. Grant migration permissions
     - note: _without_ permission for access to data within tables
     - `GRANT ALL PRIVILEGES ON SCHEMA public TO migrator;`
-9. Test (todo)
+9. Add repository secrets
+    - Much like before
+    - first, the connection information for the API user:
+        - name: DB_CONNECTION_STRING_API
+        - example value: "api:p4ssw0rd@template-guide-database.your-id.us-east-2.rds.amazonaws.com:5432/prod"
+    - then, for the migrator:
+        - name: DB_CONNECTION_STRING_MIGRATOR
+        - example value: "migrator:P4SSW0RD@template-guide-database.your-id.us-east-2.rds.amazonaws.com:5432/prod"
 
 ## Setup Production SSH Connection
 
