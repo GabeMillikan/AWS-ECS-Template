@@ -5,4 +5,3 @@ sqlalchemy
 alembic
 asyncpg
 psutil
-requests
