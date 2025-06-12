@@ -61,10 +61,10 @@ todo: explain how the aws layout works
        <img src="./.github/readme-images/searchbar-vpc.png" height="150px"/>
    </details>
 5. Go to "Your VPCs"
-<details>
-    <summary>See Image</summary>
-    <img src="./.github/readme-images/your-vpcs.png" width="150px"/>
-</details>
+   <details>
+      <summary>See Image</summary>
+      <img src="./.github/readme-images/your-vpcs.png" width="150px"/>
+   </details>
 6. Click "Create VPC"
    - in the upper right
    - Note: this is the last time that I will explain UI navigation. It is quite consistent going forward.
