@@ -288,16 +288,18 @@ todo: explain how the aws layout works
 1. Create a Service
    - The service is responsible for facilitating the creation of tasks within the cluster
    - click on your cluster -> Services -> Create (at the bottom of the page)
+   - Service details
+     - Task definition family: select the one from earlier
+     - Revision: select the latest one
+     - I will name mine `template-guide-service`
    - Environment
      - Compute options: Launch type
      - Launch type: Fargate
      - Platform version: LATEST
    - Deployment Configuration
-     - Application type: Service
-     - Family: Select the task definition created in step 2
-     - Revision: (LATEST)
-     - I will name mine `template-guide-service`
+     - Service type: Replica
      - Desired tasks: 2 (for now, to demonstrate load balancing; we will setup auto-scaling later)
+     - Enable Availability Zone rebalancing (it ensures tasks are evenly spread across AZ's)
    - Networking
      - VPC: choose your VPC, mine is `template-guide-vpc`
      - Subnets: choose all of the public ones (all of them, if you didn't create private subnets)
