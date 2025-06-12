@@ -166,7 +166,6 @@ todo: explain how the aws layout works
    - Go back to ECR -> Private Registry -> Repositories
    - Click into each of your repositories and verify that a new `latest` image was uploaded
    - If you want to, make a few more commits to the `main` branch, and verify that new images are uploaded
-   - TODO: auto-delete old images so that S3 space isn't wasted?
    <details>
        <summary>See Image</summary>
        <img src="./.github/readme-images/ecr-latest-image-uploaded.png" width="600px"/>
