@@ -459,4 +459,78 @@ todo: explain how the aws layout works
 
 ## Setup Production SSH Connection
 
-todo
+tbh i don't fucking wanna update this repository to support this out of the box
+so i'll just describe the changes required here:
+
+1. Create an ecsTaskRole for your task definitions (i.e. alongside the ecsTaskExecutionRole)
+   - it must have [permissions](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#ecs-exec-required-iam-permissions) to create and use SSM Messages
+2. Add `--enable-execute-command` to the `update-service` auto-deployment command
+3. use [this tool](https://github.com/aws-containers/amazon-ecs-exec-checker) to verify that ur shit is accessible
+4. create a new IAM User Group called "Developers" or you can be more specific like "People with console access"
+5. Add two permissions:
+   - ecs:ExecuteCommand
+   - ecs:DescribeTasks
+   - ecs:ListTasks
+6. Create a user (for each developer) and add them to the group. Create an access key for the user.
+7. Create a dockerfile like this
+
+   ```Dockerfile
+   FROM public.ecr.aws/aws-cli/aws-cli:latest
+
+   # install SessionManager plugin
+   RUN yum install -y curl unzip
+   RUN curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o session-manager-plugin.rpm
+   RUN yum install -y session-manager-plugin.rpm
+   RUN rm session-manager-plugin.rpm
+
+   ENV REMOTE_COMMAND="sh"
+
+   ENTRYPOINT [ "sh", "-c" ]
+   CMD [ \
+      "export TASK=\"$(aws ecs list-tasks \
+      --cluster \"$AWS_CLUSTER\" \
+      --service-name \"$AWS_SERVICE\" \
+      --desired-status RUNNING \
+      --max-items 1 \
+      --query \"taskArns[0]\" \
+      --output text)\" \
+      && aws ecs execute-command \
+      --cluster \"$AWS_CLUSTER\" \
+      --task \"$TASK\" \
+      --container \"backend\" \
+      --interactive \
+      --command \"$REMOTE_COMMAND\" \
+      " ]
+   ```
+
+8. Add this to your docker-compose (otherwise just docker exec the above)
+
+   ```yml
+   x-prod-exec: &prod-exec
+     build:
+       context: .
+       dockerfile: ./.docker/prod-exec.Dockerfile # from above
+     profiles: ["prod-exec"]
+     stdin_open: true
+     tty: true
+
+   x-prod-exec-env: &prod-exec-env
+     AWS_ACCESS_KEY_ID: ${AWS_PROD_ACCESS_KEY_ID}
+     AWS_SECRET_ACCESS_KEY: ${AWS_PROD_SECRET_ACCESS_KEY}
+     AWS_CLUSTER: ${AWS_PROD_CLUSTER}
+     AWS_SERVICE: ${AWS_PROD_SERVICE}
+     AWS_REGION: ${AWS_PROD_REGION}
+
+   services:
+     prod-repl:
+       <<: *prod-exec
+       environment:
+         <<: *prod-exec-env
+         REMOTE_COMMAND: "python -i -c 'from app import *'"
+
+     prod-ssh:
+       <<: *prod-exec
+       environment:
+         <<: *prod-exec-env
+         REMOTE_COMMAND: "sh"
+   ```
